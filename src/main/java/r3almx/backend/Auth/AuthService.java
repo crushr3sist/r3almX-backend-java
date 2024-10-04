@@ -23,21 +23,12 @@ public class AuthService {
         AuthService.userRepository = userRepository;
     }
 
-    public static boolean verifyUser(String email) {
-        User _user = userRepository.findUserByEmail(email);
-        if (_user != null) {
-            return true;
-        } else {
-            return false;
-        }
-
-    }
-
-    public static String createToken(String subject, String email) {
-        if (verifyUser(email)) {
+    public String createToken(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if (user != null) {
 
             return Jwts.builder()
-                    .setSubject(subject)
+                    .setSubject(user.getId().toString())
                     .claim("email", email)
                     .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                     .signWith(key)
@@ -45,7 +36,9 @@ public class AuthService {
         }
         return null;
     }
-    public static Claims 
-    
+
+    public Claims decodeToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
 
 }
