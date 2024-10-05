@@ -1,8 +1,6 @@
 package r3almx.backend.Auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -41,18 +39,6 @@ public class AuthService {
 
     public Claims decodeToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-    }
-
-    public UserDetails loadUserByEmail(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email.toString());
-        }
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password("")
-                .authorities("USER")
-                .build();
     }
 
 }

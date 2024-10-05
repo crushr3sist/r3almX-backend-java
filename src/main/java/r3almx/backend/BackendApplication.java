@@ -10,7 +10,7 @@ public class BackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(BackendApplication.class);
-		app.setDefaultProperties(Collections.singletonMap("server.port", "0"));
+		app.setDefaultProperties(Collections.singletonMap("server.port", "5000"));
 		app.run(args);
 	}
 

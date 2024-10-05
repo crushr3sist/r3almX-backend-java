@@ -17,11 +17,12 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
-
+    
     @PostMapping("/create/token")
     @ResponseBody
     public Map<String, String> createToken(@RequestBody JWTTokenGenerate request) {
         Map<String, String> tokenResponse = new HashMap<>();
+        System.out.println(request.getEmail());
         String accessToken = authService.createToken(request.getEmail());
         tokenResponse.put("access_token", accessToken);
         return tokenResponse;
@@ -34,7 +35,7 @@ public class AuthController {
         Claims accessToken = authService.decodeToken(request.getToken());
 
         tokenResponse.put("email", accessToken.get("email").toString());
-        tokenResponse.put("id", accessToken.getSubject().toString());
+        tokenResponse.put("id", accessToken.getSubject());
 
         tokenResponse.put("expire", accessToken.getExpiration().toString());
         return tokenResponse;
