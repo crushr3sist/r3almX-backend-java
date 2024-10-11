@@ -3,18 +3,30 @@ package r3almx.backend.Rooms;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import r3almx.backend.Rooms.RequestInterfaces.CreateRoomReq;
+
 @RestController
 @RequestMapping("/rooms")
 public class RoomsController {
+
+    private final RoomsService roomService;
+
+    @Autowired
+    public RoomsController(RoomsService roomService) {
+        this.roomService = roomService;
+    }
 
     @GetMapping("/current_user")
     public Object current_user() {
@@ -25,9 +37,21 @@ public class RoomsController {
 
     @PostMapping("/create")
     @ResponseBody
-    public Map<String, String> createRoom() {
-        Map<String, String> responseBody = new HashMap<>();
-        return responseBody;
+    public ResponseEntity<?> createRoom(@RequestBody CreateRoomReq request) {
+        try {
+            Rooms createdRoom = roomService.createRoom(request.getRoomName());
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("status", "success");
+            responseBody.put("roomId", createdRoom.getId().toString());
+            responseBody.put("invitekey", createdRoom.getInviteKey());
+            roomService.createRoom(request.getRoomName());
+            return ResponseEntity.ok(responseBody);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     @PostMapping("/ban")
@@ -59,7 +83,7 @@ public class RoomsController {
         return responseBody;
     }
 
-    @DeleteMapping("/edit")
+    @DeleteMapping("/delete")
     @ResponseBody
     public Map<String, String> deleteRoom() {
         Map<String, String> responseBody = new HashMap<>();

@@ -41,8 +41,20 @@ public class AuthService {
         return null;
     }
 
-    public Object getCurrentUser() {
+    public static Object getCurrentUserEmail() {
         return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    public static String getCurrentUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User user = userRepository.findUserByEmail(email);
+        return user.getId().toString();
+    }
+
+    public User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User user = userRepository.findUserByEmail(email);
+        return user;
     }
 
     public UserDetails loadUserByUsername(String email) {
