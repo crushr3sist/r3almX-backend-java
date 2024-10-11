@@ -1,15 +1,19 @@
 package r3almx.backend.Auth;
 
+import java.security.Key;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-
-import java.security.Key;
-import java.util.Date;
-
 import r3almx.backend.User.User;
 import r3almx.backend.User.UserRepository;
 
@@ -35,6 +39,20 @@ public class AuthService {
                     .compact();
         }
         return null;
+    }
+
+    public Object getCurrentUser() {
+        return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    public UserDetails loadUserByUsername(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+
+        }
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
+                new ArrayList<>());
     }
 
     public Claims decodeToken(String token) {

@@ -1,8 +1,10 @@
 package r3almx.backend.User;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import r3almx.backend.Rooms.Rooms;
 
 @Entity
 @Table(name = "users")
@@ -20,6 +22,9 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy="roomOwner", cascade=CascadeType.ALL)
+    private List<Rooms> userRooms;
 
     protected User() {
     }
@@ -65,5 +70,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Rooms> getRooms() {
+        return userRooms;
+    }
+
+    public void setRooms(List<Rooms> userRooms) {
+        this.userRooms = userRooms;
     }
 }

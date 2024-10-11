@@ -17,7 +17,9 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
+
     
+
     @PostMapping("/create/token")
     @ResponseBody
     public Map<String, String> createToken(@RequestBody JWTTokenGenerate request) {
