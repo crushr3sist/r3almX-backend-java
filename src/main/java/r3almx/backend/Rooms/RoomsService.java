@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import r3almx.backend.Auth.AuthService;
 import r3almx.backend.User.User;
+import r3almx.backend.User.UserRepository;
 
 @Service
 @Transactional
@@ -21,35 +22,64 @@ public class RoomsService {
     private final AuthService authService;
 
     @Autowired
+    private final UserRepository userRepository;
+
+    @Autowired
     private final RoomsRepository roomsRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public RoomsService(RoomsRepository roomsRepository, AuthService authService) {
+    public RoomsService(RoomsRepository roomsRepository, AuthService authService, UserRepository userRepository) {
         this.authService = authService;
         this.roomsRepository = roomsRepository;
+        this.userRepository = userRepository;
+
     }
 
     public Rooms createRoom(String roomName) {
+
+        if (roomsRepository.findByRoomName(roomName).isPresent()) {
+            throw new RuntimeException("Room name '" + roomName + "' already exists");
+        }
+
         User currentUser = authService.getCurrentUser();
-        List<String> initialMembers = new ArrayList<>();
-        initialMembers.add(currentUser.getId().toString());
+        List<User> initialMembers = new ArrayList<>();
 
+        initialMembers.add(currentUser);
         Rooms room = new Rooms(roomName, currentUser, initialMembers);
-
         Rooms savedRoom = roomsRepository.save(room);
+        currentUser.joinRoom(room);
 
-        createRoomTables(savedRoom.getId().toString());
+        try {
+            createRoomTables(savedRoom.getId().toString());
+        } catch (InterruptedException e) {
+            // Log the error and consider throwing a custom exception
+        }
 
         return savedRoom;
     }
 
-    private void createRoomTables(String _roomId) {
-        // SQL for channels table creation
+    @Transactional
+    public void joinRoom(UUID userId, UUID roomId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Rooms room = roomsRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        // Add the user to the room and the room to the user's list of rooms
+        room.addMember(user);
+
+        // Save the updates
+        userRepository.save(user);
+        roomsRepository.save(room);
+    }
+
+    private void createRoomTables(String _roomId) throws InterruptedException {
         String roomId = _roomId.replace("-", "_");
-        
-        String createChannelsTable = "CREATE TABLE channels_" + roomId + " (" +
+
+        String createChannelsTable = "CREATE TABLE IF NOT EXISTS channels_" + roomId + " (" +
                 "id uuid PRIMARY KEY, " +
                 "channel_name VARCHAR(255), " +
                 "channel_description VARCHAR(255), " +
@@ -57,44 +87,54 @@ public class RoomsService {
                 "time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ");";
 
-        String createMessagesTable = "CREATE TABLE messages_" + roomId + " (" +
+        String createMessagesTable = "CREATE TABLE IF NOT EXISTS messages_" + roomId + " (" +
                 "id uuid PRIMARY KEY, " +
                 "channel_id uuid, " +
-                "sender_id uuid, " +
+                "sender_id VARCHAR(255), " +
                 "message TEXT, " +
                 "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                "FOREIGN KEY (channel_id) REFERENCES channels_" + roomId + "(id) ON DELETE CASCADE, " +
-                "FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE" +
+                "FOREIGN KEY (channel_id) REFERENCES channels_" + roomId + "(id) ON DELETE CASCADE" +
                 ");";
 
         try {
-            // Execute the SQL statements
+            // Start SQL execution
             jdbcTemplate.execute(createChannelsTable);
             jdbcTemplate.execute(createMessagesTable);
         } catch (DataAccessException e) {
-            // Log the exception for debugging purposes
+            // Rollback transaction on failure
             System.err.println("Error executing SQL statements: " + e.getMessage());
+            throw e; // Rethrow exception to ensure proper transaction rollback
         }
     }
 
-    public void addMemberToRoom(UUID roomId, String memberName) {
+    public void addMemberToRoom(UUID roomId, User member) {
         Rooms room = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found"));
-        room.addMember(memberName);
+        room.addMember(member);
         roomsRepository.save(room);
     }
 
-    public void removeMemberFromRoom(UUID roomId, String memberName) {
+    public void removeMemberFromRoom(UUID roomId, User member) {
         Rooms room = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found"));
-        room.removeMember(memberName);
+        room.removeMember(member);
         roomsRepository.save(room);
     }
 
-    public List<String> getRoomMembers(UUID roomId) {
+    public List<User> getRoomMembers(UUID roomId) {
         Rooms room = roomsRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found"));
-        return room.getAllMembers();
+        return room.getMembers();
     }
 
+    public List<Rooms> getUserRooms() {
+        User currentUser = authService.getCurrentUser();
+        return currentUser.getUserRooms();
+    }
+
+    public List<Rooms> getUserRoomsById(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getUserRooms();
+    }
 }

@@ -1,6 +1,7 @@
 package r3almx.backend.Rooms;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,26 +55,13 @@ public class RoomsController {
         }
     }
 
-    @PostMapping("/ban")
-    @ResponseBody
-    public Map<String, String> banUserFromRoom() {
-        Map<String, String> responseBody = new HashMap<>();
-        return responseBody;
-    }
-
-    @PostMapping("/kick")
-    @ResponseBody
-    public Map<String, String> kickUserFromRoom() {
-        Map<String, String> responseBody = new HashMap<>();
-        return responseBody;
-    }
-
     @GetMapping("/fetch")
     @ResponseBody
-
-    public Map<String, String> fetchRooms() {
+    public ResponseEntity<?> fetchRooms() {
+        List<Rooms> _userRooms = roomService.getUserRooms();
         Map<String, String> responseBody = new HashMap<>();
-        return responseBody;
+        responseBody.put("rooms", _userRooms.toString());
+        return ResponseEntity.ok(responseBody);
     }
 
     @PutMapping("/edit")

@@ -3,12 +3,21 @@ package r3almx.backend.User;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import r3almx.backend.Rooms.Rooms;
 
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -23,7 +32,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy="roomOwner", cascade=CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(name = "user_rooms", // Join table name
+            joinColumns = @JoinColumn(name = "user_id"), // User column in join table
+            inverseJoinColumns = @JoinColumn(name = "room_id") // Room column in join table
+    )
     private List<Rooms> userRooms;
 
     protected User() {
@@ -72,11 +85,20 @@ public class User {
         this.password = password;
     }
 
-    public List<Rooms> getRooms() {
+    public List<Rooms> getUserRooms() {
         return userRooms;
     }
 
-    public void setRooms(List<Rooms> userRooms) {
+    public void setUserRooms(List<Rooms> userRooms) {
         this.userRooms = userRooms;
     }
+
+    public void joinRoom(Rooms room) {
+        this.userRooms.add(room);
+    }
+
+    public void leaveRoom(Rooms room) {
+        this.userRooms.remove(room);
+    }
+
 }
