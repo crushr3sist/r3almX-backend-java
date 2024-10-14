@@ -3,6 +3,7 @@ package r3almx.backend.Rooms;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -59,9 +60,9 @@ public class RoomsController {
     @ResponseBody
     public ResponseEntity<?> fetchRooms() {
         List<Rooms> _userRooms = roomService.getUserRooms();
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("rooms", _userRooms.toString());
-        return ResponseEntity.ok(responseBody);
+        List<RoomDTO> roomDTO = _userRooms.stream().map(room -> new RoomDTO(room.getId(), room.getRoomName(),
+                room.getInviteKey(), room.getRoomOwner().getUsername())).collect(Collectors.toList());
+        return ResponseEntity.ok(roomDTO);
     }
 
     @PutMapping("/edit")

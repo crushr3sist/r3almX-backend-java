@@ -3,6 +3,8 @@ package r3almx.backend.User;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +39,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"), // User column in join table
             inverseJoinColumns = @JoinColumn(name = "room_id") // Room column in join table
     )
+    @JsonBackReference
     private List<Rooms> userRooms;
 
     protected User() {
