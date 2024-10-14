@@ -19,7 +19,7 @@ public class ChatSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatSocket(), "/chat")
+        registry.addHandler(new ChatSocket(), "/message")
                 .addInterceptors(jwtAuthenticationInterceptor)
                 .setAllowedOrigins("*");
     }
