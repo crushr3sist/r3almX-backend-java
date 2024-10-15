@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import r3almx.backend.Rooms.RequestInterfaces.ChangeRoomReq;
 import r3almx.backend.Rooms.RequestInterfaces.CreateRoomReq;
 
 @RestController
@@ -67,7 +68,7 @@ public class RoomsController {
 
     @PutMapping("/edit")
     @ResponseBody
-    public Map<String, String> editRoom() {
+    public ResponseEntity<?> editRoom(@RequestBody ChangeRoomReq request) {
         Map<String, String> responseBody = new HashMap<>();
         return responseBody;
     }

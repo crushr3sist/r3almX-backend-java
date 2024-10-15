@@ -51,7 +51,7 @@ public class AuthService {
         return user.getId().toString();
     }
 
-    public User getCurrentUser() {
+    public static User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         User user = userRepository.findUserByEmail(email);
         return user;

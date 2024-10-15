@@ -56,9 +56,11 @@ welcome to r3almx re-imagine. This repo is a re-write of r3almx backend going fr
   - [x] Read
   - [ ] Edit
   - [ ] Delete
-  - [ ] Invites
+  - [x] generate invite key
+- [ ] Invites
+  - [x] Fetch
   - [ ] Update Invites
-  - [ ] Join Room
+  - [x] Join Room
 - [ ] Channels
   - [ ] Create
   - [ ] Read

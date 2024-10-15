@@ -34,7 +34,6 @@ public class RoomsService {
         this.authService = authService;
         this.roomsRepository = roomsRepository;
         this.userRepository = userRepository;
-
     }
 
     public Rooms createRoom(String roomName) {
