@@ -1,4 +1,4 @@
-package r3almx.backend.Auth;
+package r3almx.backend.Auth.AuthPojos;
 
 public class JWTTokenDecode {
     private String token;

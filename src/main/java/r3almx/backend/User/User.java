@@ -31,6 +31,12 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(unique = true, nullable = true)
+    private String googleId;
+
+    @Column(unique = true, nullable = false)
+    private String profilePic;
+
     @Column(nullable = false)
     private String password;
 
@@ -50,6 +56,12 @@ public class User {
         this.username = username;
         this.password = password;
     }
+
+    public void setGoogleId(String googleId){
+        this.googleId = googleId;
+    }
+
+    
 
     @Override
     public String toString() {
