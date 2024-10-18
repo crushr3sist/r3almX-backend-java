@@ -1,6 +1,7 @@
 package r3almx.backend.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -34,7 +35,7 @@ public class User {
     @Column(unique = true, nullable = true)
     private String googleId;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = false, nullable = true)
     private String profilePic;
 
     @Column(nullable = false)
@@ -51,17 +52,30 @@ public class User {
     protected User() {
     }
 
-    public User(String email, String username, String password) {
+    public User(String email, String username, String password, Optional<String> googleId,
+            Optional<String> profilePic) {
         this.email = email;
         this.username = username;
         this.password = password;
+        this.googleId = googleId.orElse(null);
+        this.profilePic = profilePic.orElse(null);
     }
 
-    public void setGoogleId(String googleId){
+    public void setGoogleId(String googleId) {
         this.googleId = googleId;
     }
 
-    
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
+    }
+
+    public String getProfilePic() {
+        return profilePic;
+    }
 
     @Override
     public String toString() {

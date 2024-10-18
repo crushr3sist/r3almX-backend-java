@@ -6,7 +6,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
+@Transactional
 public class UserService {
     @Autowired
     private final UserRepository userRepository;
@@ -14,6 +17,16 @@ public class UserService {
     public UserService(UserRepository UserRepository) {
         this.userRepository = UserRepository;
     }
+
+    // modifiers / editors
+    public User changeName(User user){return user;}
+    public User changeProfilePic(User user){return user;}
+
+    public void addGoogleId(User user, String googleId){
+        UUID userId = user.getId();
+        userRepository.updateGoogleIdById(googleId, userId);
+    }
+
 
     public User createUser(User user) {
         return userRepository.save(user);

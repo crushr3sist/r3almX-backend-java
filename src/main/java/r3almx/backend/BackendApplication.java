@@ -1,7 +1,7 @@
 package r3almx.backend;
 
 import java.util.Collections;
-import r3almx.backend.User.*;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

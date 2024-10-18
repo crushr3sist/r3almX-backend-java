@@ -38,7 +38,8 @@ public class AuthController {
 
     @PostMapping("/google/callback")
     public ResponseEntity<?> postMethodName(@RequestBody GoogleTokenRequest request) {
-        String googleToken = request.getGoogleToken();
+        String googleToken = request.getCode();
+        System.out.println(googleToken);
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
                     JacksonFactory.getDefaultInstance())
@@ -48,14 +49,15 @@ public class AuthController {
 
             if (idToken != null) {
                 GoogleIdToken.Payload payload = idToken.getPayload();
+                payload.entrySet().forEach(e -> System.out.println(e.toString()));
 
                 String email = payload.getEmail();
-                String userId = payload.getSubject();
+                String googleId = payload.getSubject();
                 String pictureUrl = (String) payload.get("picture");
                 String name = (String) payload.get("name");
 
                 System.out.println("Google User Email: " + email);
-                System.out.println("Google User Id: " + userId);
+                System.out.println("Google User Id: " + googleId);
 
                 String accessToken = authService.createToken(email);
 
@@ -67,6 +69,13 @@ public class AuthController {
             throw new RuntimeException("google token verification failed", e);
         }
     }
+
+    @PostMapping("/register")
+    public String postMethodName(@RequestBody String entity) {
+        
+        return entity;
+    }
+    
 
     @PostMapping("/create/token")
     @ResponseBody
