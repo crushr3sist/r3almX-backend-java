@@ -21,4 +21,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Transactional
     @Query("UPDATE User u SET u.profilePic = ?1 WHERE u.id = ?2")
     int updateProfilePicById(String profilePic, UUID id); // Correct JPA method
+
 }

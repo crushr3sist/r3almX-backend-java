@@ -22,6 +22,8 @@ import r3almx.backend.Auth.AuthPojos.GoogleTokenRequest;
 import r3almx.backend.Auth.AuthPojos.JWTTokenDecode;
 import r3almx.backend.Auth.AuthPojos.JWTTokenGenerate;
 import r3almx.backend.Auth.AuthPojos.TokenResponse;
+import r3almx.backend.User.User;
+import r3almx.backend.User.UserRepository;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,11 +31,14 @@ public class AuthController {
 
     @Autowired
     private final AuthService authService;
+    @Autowired
+    private final UserRepository userRepository;
 
     private static final String CLIENT_ID = "1033716509262-h52etdps8cab2p2ab7gfh8li40u8opsa.apps.googleusercontent.com";
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserRepository userRepository) {
         this.authService = authService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/google/callback")
@@ -58,6 +63,19 @@ public class AuthController {
 
                 System.out.println("Google User Email: " + email);
                 System.out.println("Google User Id: " + googleId);
+                // check to see if user exists
+                // we get the user record from the email verified by google
+                User userExists = userRepository.findUserByEmail(email);
+                //check to see if the user record is null
+                if (userExists!=null){
+                    // if not 
+                    // if user does exist then we check to see if they have a google id attached
+                    // we check to see if the decoded userid from the payload matches the user record googleId
+                    
+                    if(userExists.getGoogleId() == null ? googleId != null : !userExists.getGoogleId().equals(googleId)){
+                        userRepository.updateGoogleIdById(googleId, userExists.getId());
+                    }
+                }
 
                 String accessToken = authService.createToken(email);
 
