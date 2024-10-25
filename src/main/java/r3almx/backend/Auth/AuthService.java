@@ -14,6 +14,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import r3almx.backend.Auth.AuthPojos.TokenResponse;
 import r3almx.backend.User.User;
 import r3almx.backend.User.UserRepository;
 
@@ -27,16 +28,17 @@ public class AuthService {
         AuthService.userRepository = userRepository;
     }
 
-    public String createToken(String email) {
+    public TokenResponse createToken(String email) {
         User user = userRepository.findUserByEmail(email);
         if (user != null) {
-
-            return Jwts.builder()
+            Date expireDate = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24);
+            String token = Jwts.builder()
                     .setSubject(user.getId().toString())
                     .claim("email", email)
-                    .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                    .setExpiration(expireDate)
                     .signWith(key)
                     .compact();
+            return new AuthPojos.TokenResponse(token, expireDate);
         }
         return null;
     }
@@ -45,10 +47,21 @@ public class AuthService {
         return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public static String getToken() {
+        String token = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        return token;
+
+    }
+
     public static String getCurrentUserId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         User user = userRepository.findUserByEmail(email);
         return user.getId().toString();
+    }
+
+    public Boolean userExists(String email) {
+        User user = userRepository.findUserByEmail(email);
+        return user != null;
     }
 
     public static User getCurrentUser() {

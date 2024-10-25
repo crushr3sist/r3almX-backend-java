@@ -70,7 +70,7 @@ public class RoomsController {
     @ResponseBody
     public ResponseEntity<?> editRoom(@RequestBody ChangeRoomReq request) {
         Map<String, String> responseBody = new HashMap<>();
-        return responseBody;
+        return ResponseEntity.ok(responseBody);
     }
 
     @DeleteMapping("/delete")

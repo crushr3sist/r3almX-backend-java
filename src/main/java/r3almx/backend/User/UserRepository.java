@@ -20,6 +20,11 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Modifying
     @Transactional
     @Query("UPDATE User u SET u.profilePic = ?1 WHERE u.id = ?2")
-    int updateProfilePicById(String profilePic, UUID id); // Correct JPA method
+    int updateProfilePicById(String profilePic, UUID id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.username = ?1 WHERE u.id = ?2")
+    int updateUsernameById(String newUsername, UUID id);
 
 }

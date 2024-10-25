@@ -28,7 +28,13 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
-
+    // !SECTION JWT blacklisting
+    // create a user_secret_key which is email_uuid4 and thats used inside of the
+    // jwt decoding
+    // once a jwt is created, a new uuid is created, the user_secret_key is updated
+    // and then its used to create the new token
+    // once a user logs out, if the expire-time isnt up, we wont nullify the user's
+    // secret_key, otherwise we'll delete the secret key
     @Column(unique = true, nullable = false)
     private String username;
 

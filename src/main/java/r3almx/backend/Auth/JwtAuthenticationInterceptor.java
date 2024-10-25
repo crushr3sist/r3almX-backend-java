@@ -27,7 +27,7 @@ public class JwtAuthenticationInterceptor implements HandshakeInterceptor {
 
         Claims claims = token != null ? authService.decodeToken(token) : null;
         if (claims != null) {
-            attributes.put("username", authService.getCurrentUser().getUsername());
+            attributes.put("username", AuthService.getCurrentUser().getUsername());
             return true;
         }
         response.setStatusCode(HttpStatus.UNAUTHORIZED);

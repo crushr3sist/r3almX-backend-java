@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import r3almx.backend.Auth.AuthService;
 
 @Service
 @Transactional
@@ -19,14 +20,20 @@ public class UserService {
     }
 
     // modifiers / editors
-    public User changeName(User user){return user;}
-    public User changeProfilePic(User user){return user;}
+    public void changeName(String newUsername) {
+        UUID user = AuthService.getCurrentUser().getId();
+        System.out.println(user.toString());
+        userRepository.updateUsernameById(newUsername, user);
+    }
 
-    public void addGoogleId(User user, String googleId){
+    public User changeProfilePic(User user) {
+        return user;
+    }
+
+    public void addGoogleId(User user, String googleId) {
         UUID userId = user.getId();
         userRepository.updateGoogleIdById(googleId, userId);
     }
-
 
     public User createUser(User user) {
         return userRepository.save(user);
