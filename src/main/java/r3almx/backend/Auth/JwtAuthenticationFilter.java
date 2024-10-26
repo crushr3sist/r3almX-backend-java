@@ -17,7 +17,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AuthService authService;
-    private static final List<String> EXCLUDED_PATHS = List.of("/auth/register/", "/auth/google/callback/",
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            "/auth/register",
+            "/auth/google/callback",
             "/auth/token/create",
             "/ws/**");
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -36,10 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // Bypass authentication for excluded paths
             if (EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, requestPath))) {
+                System.err.println("url being filter out: " + requestPath);
                 chain.doFilter(request, response);
                 return;
             }
-
+            System.out.println(requestPath);
+            System.out.println("it wasnt filtered out");
             // Check for valid Authorization header
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
