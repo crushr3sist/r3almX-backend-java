@@ -1,7 +1,6 @@
 package r3almx.backend.Auth;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -151,11 +150,8 @@ public class AuthController {
     public ResponseEntity<?> verifyToken() {
         Map<String, String> errorResponse = new HashMap<>();
         try {
-
-            Claims accessToken = authService.decodeToken(AuthService.getToken());
-            Date expire = accessToken.getExpiration();
-            Date now = new Date();
-            if (expire.before(now)) {
+            Boolean isValid = authService.verifyTokenByExpire();
+            if (isValid) {
                 return ResponseEntity.ok(200);
             }
         } catch (SignatureException e) {

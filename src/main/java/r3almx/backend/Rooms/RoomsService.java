@@ -38,11 +38,11 @@ public class RoomsService {
 
     public Rooms createRoom(String roomName) {
 
-        if (roomsRepository.findByRoomName(roomName).isPresent()) {
+        if (roomsRepository.findByRoomName(roomName) != null) {
             throw new RuntimeException("Room name '" + roomName + "' already exists");
         }
 
-        User currentUser = authService.getCurrentUser();
+        User currentUser = AuthService.getCurrentUser();
         List<User> initialMembers = new ArrayList<>();
 
         initialMembers.add(currentUser);
@@ -127,7 +127,7 @@ public class RoomsService {
     }
 
     public List<Rooms> getUserRooms() {
-        User currentUser = authService.getCurrentUser();
+        User currentUser = AuthService.getCurrentUser();
         return currentUser.getUserRooms();
     }
 

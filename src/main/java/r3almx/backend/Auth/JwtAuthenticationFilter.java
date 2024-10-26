@@ -17,9 +17,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AuthService authService;
-
-    private static final List<String> EXCLUDED_PATHS = List.of("/auth", "/auth/**", "/users", "/users/**", "/ws/**");
-
+    private static final List<String> EXCLUDED_PATHS = List.of("/auth/register/", "/auth/google/callback/",
+            "/auth/token/create",
+            "/ws/**");
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public JwtAuthenticationFilter(AuthService authService) {
@@ -29,44 +29,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         String requestPath = request.getServletPath();
-
-        if (EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, requestPath))){
-            chain.doFilter(request, response);
-            return;
-        }
-
         String authorizationHeader = request.getHeader("Authorization");
-        String token;
-        String userEmail;
 
         try {
+            // Bypass authentication for excluded paths
+            if (EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, requestPath))) {
+                chain.doFilter(request, response);
+                return;
+            }
 
+            // Check for valid Authorization header
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Missing or invalid Authorization header");
                 return;
             }
 
-            token = authorizationHeader.substring(7);
-            userEmail = authService.decodeToken(token).get("email", String.class);
+            // Extract token and decode it
+            String token = authorizationHeader.substring(7);
+            System.out.println("JWT Token from header: " + token);
+            String userEmail = authService.decodeToken(token).get("email", String.class);
+
             if (userEmail == null) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("Invalid or expired token");
                 return;
             }
+
+            // Set authentication context if not already set
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (authService.decodeToken(token) != null) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userEmail, token, new ArrayList<>());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userEmail, token, new ArrayList<>());
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                System.out.println("Token set in SecurityContext: " + token);
             }
+
             chain.doFilter(request, response);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("An error occured while processing the request: " + e.getMessage());
+            response.getWriter().write("An error occurred while processing the request: " + e.getMessage());
         }
     }
 }
