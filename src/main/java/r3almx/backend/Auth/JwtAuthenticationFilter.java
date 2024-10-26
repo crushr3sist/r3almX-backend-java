@@ -2,10 +2,12 @@ package r3almx.backend.Auth;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -16,6 +18,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AuthService authService;
 
+    private static final List<String> EXCLUDED_PATHS = List.of("/auth", "/auth/**", "/users", "/users/**", "/ws/**");
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     public JwtAuthenticationFilter(AuthService authService) {
         this.authService = authService;
     }
@@ -23,10 +29,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        String requestPath = request.getServletPath();
+
+        if (EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, requestPath))){
+            chain.doFilter(request, response);
+            return;
+        }
 
         String authorizationHeader = request.getHeader("Authorization");
         String token;
         String userEmail;
+
         try {
 
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
