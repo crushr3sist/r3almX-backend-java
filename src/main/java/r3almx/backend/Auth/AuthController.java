@@ -148,18 +148,21 @@ public class AuthController {
     @PostMapping("/token/verify")
     @ResponseBody
     public ResponseEntity<?> verifyToken() {
-        Map<String, String> errorResponse = new HashMap<>();
+        Map<String, String> responseJson = new HashMap<>();
         try {
             Boolean isValid = authService.verifyTokenByExpire();
+            System.out.println("Token Verify: " + isValid);
             if (isValid) {
-                return ResponseEntity.ok(200);
+                responseJson.put("status", "200");
+                responseJson.put("message", "token is valid");
+                return ResponseEntity.ok(responseJson);
             }
         } catch (SignatureException e) {
 
-            errorResponse.put("status", "403");
-            errorResponse.put("message", "token expired");
+            responseJson.put("status", "403");
+            responseJson.put("message", "token expired");
         }
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity.badRequest().body(responseJson);
     }
 
     @PostMapping("/token/decode")

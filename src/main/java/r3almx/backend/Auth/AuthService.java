@@ -85,16 +85,9 @@ public class AuthService {
     }
 
     public Boolean verifyTokenByExpire() {
-        // we decode our token, create a new date variable and compare the tokens using
-        // date operator
-        // if the tokens time is less than current time, its not valid
         String token = getToken();
         Claims tokenExpire = decodeToken(token);
         Date rightNow = new Date();
-        if (tokenExpire.getExpiration().before(rightNow)) {
-            return true;
-        }
-        return false;
+        return (tokenExpire.getExpiration()).after(rightNow);
     }
-
 }
