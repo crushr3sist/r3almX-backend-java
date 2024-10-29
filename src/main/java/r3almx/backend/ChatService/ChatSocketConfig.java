@@ -6,6 +6,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+import r3almx.backend.Auth.AuthRepository;
+import r3almx.backend.Auth.AuthService;
 import r3almx.backend.Auth.JwtAuthenticationInterceptor;
 
 @Configuration
@@ -13,14 +15,19 @@ import r3almx.backend.Auth.JwtAuthenticationInterceptor;
 public class ChatSocketConfig implements WebSocketConfigurer {
 
     private final JwtAuthenticationInterceptor jwtAuthenticationInterceptor;
+    private final AuthService authService;
+    private final AuthRepository authRepository;
 
-    public ChatSocketConfig(JwtAuthenticationInterceptor jwtAuthenticationInterceptor) {
+    public ChatSocketConfig(AuthService authService, AuthRepository authRepository,
+            JwtAuthenticationInterceptor jwtAuthenticationInterceptor) {
+        this.authService = authService;
+        this.authRepository = authRepository;
         this.jwtAuthenticationInterceptor = jwtAuthenticationInterceptor;
     }
 
     @Override
     public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatSocket(), "/message")
+        registry.addHandler(new ChatSocket(authService, authRepository), "/message")
                 .addInterceptors(jwtAuthenticationInterceptor)
                 .setAllowedOrigins("*");
     }

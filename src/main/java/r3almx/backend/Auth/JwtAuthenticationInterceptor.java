@@ -15,39 +15,43 @@ import io.jsonwebtoken.Claims;
 public class JwtAuthenticationInterceptor implements HandshakeInterceptor {
 
     private final AuthService authService;
+    private final AuthRepository authRepository;
 
-    public JwtAuthenticationInterceptor(AuthService authService) {
+    public JwtAuthenticationInterceptor(AuthService authService, AuthRepository authRepository) {
         this.authService = authService;
+        this.authRepository = authRepository;
     }
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
             Map<String, Object> attributes) throws Exception {
+        System.out.println("Handshake started"); // Confirm interceptor is triggered
         String token = extractToken(request);
-
+        System.out.println("intercept called, and token was: " + token);
         Claims claims = token != null ? authService.decodeToken(token) : null;
+
         if (claims != null) {
-            attributes.put("username", AuthService.getCurrentUser().getUsername());
+            String userId = authRepository.findUserByEmail(claims.get("email").toString()).getId().toString();
+            System.out.println(userId);
+            attributes.put("userId", userId);
             return true;
         }
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         return false;
-
     }
 
     private String extractToken(ServerHttpRequest request) {
-        String bearerToken = request.getHeaders().getFirst("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        // Convert URI query string to extract "token" parameter manually
+        String query = request.getURI().getQuery();
+        if (query != null && query.contains("token=")) {
+            return query.substring(query.indexOf("token=") + 6);
         }
         return null;
     }
 
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-            WebSocketHandler wsHandler, Exception exception) {
-        // This method is called after the handshake. You can add any post-handshake
-        // logic here if needed.
+    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+            Exception exception) {
     }
 
 }

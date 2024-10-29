@@ -11,4 +11,6 @@ import r3almx.backend.User.User;
 public interface AuthRepository extends JpaRepository<User, UUID> {
     User findUserByEmail(String email);
 
+    User findUserById(UUID id);
+
 }
