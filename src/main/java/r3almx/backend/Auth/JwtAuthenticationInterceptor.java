@@ -27,7 +27,11 @@ public class JwtAuthenticationInterceptor implements HandshakeInterceptor {
             Map<String, Object> attributes) throws Exception {
         System.out.println("Handshake started"); // Confirm interceptor is triggered
         String token = extractToken(request);
+        String roomId = extractRoomId(request);
+
         System.out.println("intercept called, and token was: " + token);
+        System.out.println("intercept called, and roomId was: " + roomId);
+
         Claims claims = token != null ? authService.decodeToken(token) : null;
 
         if (claims != null) {
@@ -45,6 +49,16 @@ public class JwtAuthenticationInterceptor implements HandshakeInterceptor {
         String query = request.getURI().getQuery();
         if (query != null && query.contains("token=")) {
             return query.substring(query.indexOf("token=") + 6);
+        }
+        return null;
+    }
+
+    private String extractRoomId(ServerHttpRequest request) {
+        // Convert URI query string to extract "token" parameter manually
+        String roomId = request.getURI().getPath();
+
+        if (roomId != null) {
+            return roomId.substring(roomId.indexOf("message/") + 8, roomId.indexOf("?") + 1);
         }
         return null;
     }
