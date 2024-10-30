@@ -21,9 +21,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/auth/register",
             "/auth/google/callback",
             "/auth/token/create",
-            "/message",
-            "/connection"
-            );
+            "/message/**",
+            "/connection");
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 

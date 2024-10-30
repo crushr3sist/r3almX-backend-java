@@ -27,7 +27,7 @@ public class ChatSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatSocket(authService, authRepository), "/message")
+        registry.addHandler(new ChatSocket(authService, authRepository), "/message/**")
                 .addInterceptors(jwtAuthenticationInterceptor)
                 .setAllowedOrigins("*");
     }
